@@ -167,8 +167,8 @@ HTML_TEMPLATE = '''
                         <label for="classic">Classic</label>
                     </div>
                     <div class="template-option">
-                        <input type="radio" id="library" name="template" value="library">
-                        <label for="library">Library</label>
+                        <input type="radio" id="basic" name="template" value="basic">
+                        <label for="basic">Basic</label>
                     </div>
                 </div>
             </div>
