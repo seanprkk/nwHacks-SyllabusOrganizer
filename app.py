@@ -4,6 +4,7 @@ import os
 import json
 from pdf_gemini_analysis import process_pdf_with_gemini
 from populate_template import populate_markdown_template
+from notion_importer import import_to_notion
 
 app = Flask(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
@@ -113,6 +114,30 @@ HTML_TEMPLATE = '''
         .template-option label:hover {
             border-color: #667eea;
         }
+        input[type=text] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        input[type=text]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        small {
+            color: #666;
+            font-size: 12px;
+            margin-top: 5px;
+            display: block;
+        }
+        small a {
+            color: #667eea;
+            text-decoration: none;
+        }
+        small a:hover {
+            text-decoration: underline;
+        }
         button[type=submit] {
             width: 100%;
             padding: 14px;
@@ -139,6 +164,11 @@ HTML_TEMPLATE = '''
             border-radius: 8px;
             margin-bottom: 20px;
             border: 1px solid #c3e6cb;
+        }
+        .success-message a {
+            color: #155724;
+            font-weight: bold;
+            text-decoration: underline;
         }
         .error-message {
             background: #f8d7da;
@@ -188,6 +218,9 @@ HTML_TEMPLATE = '''
         <div class="success-message">
             ✓ Syllabus processed successfully!<br>
             Template: {{ template }}<br>
+            {% if notion_url %}
+            <strong>Notion Page:</strong> <a href="{{ notion_url }}" target="_blank">Open in Notion</a><br>
+            {% endif %}
             Data saved to: {{ output_file }}
         </div>
         {% if extracted_data %}
@@ -232,6 +265,12 @@ HTML_TEMPLATE = '''
                     </label>
                 </div>
                 <div id="fileName" class="file-name"></div>
+            </div>
+            
+            <div class="form-group">
+                <label>Notion API Key (Optional - for auto-import)</label>
+                <input type="text" name="notion_api_key" placeholder="secret_...">
+                <small>Get your integration token from <a href="https://www.notion.so/my-integrations" target="_blank">notion.so/my-integrations</a></small>
             </div>
             
             <button type="submit" id="submitBtn">Upload & Process Syllabus</button>
@@ -279,6 +318,7 @@ def upload():
     if request.method == 'POST':
         # Get selected template
         selected_template = request.form.get('template', 'modern')
+        notion_api_key = request.form.get('notion_api_key', '').strip()
         
         # Get uploaded file
         if 'pdf_file' not in request.files:
@@ -304,15 +344,35 @@ def upload():
                 error=f"Failed to process PDF: {error}"
             )
         
-        # Populate markdown template and auto-download
+        # Populate markdown template
         try:
             template_path = f'notion_templates/notion_template_{selected_template}.md'
             markdown_output = 'output/filled-in-template.md'
             os.makedirs('output', exist_ok=True)
             
             if os.path.exists(template_path):
-                populate_markdown_template(output_file, template_path, markdown_output)
-                return send_file(markdown_output, as_attachment=True, download_name='filled-in-template.md')
+                markdown_content = populate_markdown_template(output_file, template_path, markdown_output)
+                
+                # Import to Notion if API key provided
+                notion_url = None
+                if notion_api_key:
+                    success, notion_url, notion_error = import_to_notion(markdown_content, notion_api_key)
+                    if not success:
+                        print(f"Notion import failed: {notion_error}")
+                
+                # If no Notion key, download the file
+                if not notion_api_key:
+                    return send_file(markdown_output, as_attachment=True, download_name='filled-in-template.md')
+                
+                # Otherwise show success page with Notion link
+                return render_template_string(
+                    HTML_TEMPLATE,
+                    success=True,
+                    template=selected_template,
+                    output_file=output_file,
+                    notion_url=notion_url,
+                    extracted_data=json.dumps(extracted_data, indent=2)
+                )
         except Exception as e:
             print(f"Error populating template: {e}")
         
