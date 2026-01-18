@@ -2,7 +2,7 @@
     "course-info": {
         "code": "MATH 100",
         "title": "Differential Calculus section 101",
-        "location": "",
+        "location": "LSK Building Room 201",
         "resources": [
             {
                 "name": "Piazza",
@@ -16,7 +16,7 @@
         "contacts": [
             {
                 "name": "John Smith",
-                "position": "Instructor",
+                "position": "instructor",
                 "email": "john.smith@ubc.ca"
             }
         ],
@@ -74,7 +74,7 @@
             },
             {
                 "type": "tutorial",
-                "lead": "Jay Lee",
+                "lead": null,
                 "day": "thursday",
                 "start_time": "16:00:00",
                 "end_time": "17:00:00",

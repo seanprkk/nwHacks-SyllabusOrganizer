@@ -9,7 +9,7 @@
 | lecture | John Smith | Monday | 10:00 AM - 11:00 AM | LSK Building Room 201 |
 | lecture | John Smith | Wednesday | 10:00 AM - 11:00 AM | LSK Building Room 201 |
 | lecture | John Smith | Friday | 10:00 AM - 11:00 AM | LSK Building Room 201 |
-| tutorial | Jay Lee | Thursday | 04:00 PM - 05:00 PM | ICICS Building Room X150 |
+| tutorial | N/A | Thursday | 04:00 PM - 05:00 PM | ICICS Building Room X150 |
 
 ---
 
@@ -38,7 +38,7 @@
 
 | Name | Position | Email |
 | --- | --- | --- |
-| John Smith | Instructor | john.smith@ubc.ca |
+| John Smith | instructor | john.smith@ubc.ca |
 
 ---
 

@@ -263,7 +263,8 @@ HTML_TEMPLATE = '''
             </div>
             
             <div class="form-group">
-                <label>Notion API Key (Optional - for auto-import to your Notion account)</label>
+                <label>Notion API Key (Optional)</label>
+                <small>For automatic import to your Notion account</small>
                 <input type="text" name="notion_api_key" placeholder="ntn_...">
                 <small>Get your integration token from <a href="https://www.notion.so/my-integrations" target="_blank">notion.so/my-integrations</a></small>
             </div>
