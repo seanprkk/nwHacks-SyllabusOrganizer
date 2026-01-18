@@ -8,7 +8,7 @@ from google.genai import types
 
 # Configuration
 API_KEY = os.getenv("GEMINI_API_KEY", "AIzaSyAsMfXixL6awDAz_tBXo_D_PwkOQ5__o7o")
-OUTPUT_JSON_FILE = "data/cpsc330-syllabus-info.json"
+OUTPUT_JSON_FILE = "data/syllabus-info.json"
 
 # Gemini Prompt
 PROMPT = """

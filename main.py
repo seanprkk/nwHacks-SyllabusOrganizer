@@ -9,7 +9,7 @@ import time
 API_KEY = os.getenv("GEMINI_API_KEY", "AIzaSyBwPesUHFG-pUYf8slEx6pJFL6aLmrWtQc") 
 
 PDF_FILENAME = "docs/cpsc330-2025W1_README.pdf" 
-OUTPUT_JSON_FILE = "data/cpsc330-syllabus-info.json"
+OUTPUT_JSON_FILE = "data/syllabus-info.json"
 
 # --- PROMPT ---
 PROMPT = """
