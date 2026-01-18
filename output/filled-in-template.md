@@ -1,8 +1,8 @@
-# 📘 Overview for MATH 100 — Differential Calculus section 101
+# Overview for MATH 100 Differential Calculus section 101
 
 ---
 
-## 🕒 Class Times
+### Class Times
 
 | Type | Lead | Dates | Time | Location |
 | --- | --- | --- | --- | --- |
@@ -13,7 +13,7 @@
 
 ---
 
-## 📝 Assignments
+### Assignments
 
 | Name | Due Date | Link |
 | --- | --- | --- |
@@ -25,16 +25,16 @@
 
 ---
 
-## 📅 Important Dates
+### Important Dates
 
 | Name | Date | Location |
 | --- | --- | --- |
 | Midterm | 2026-02-15 (06:00 PM - 07:00 PM) | LSK Building Room 201 |
-| Final Exam | 2026-04-20 (06:00 PM - 09:00 PM) | LSK Building Room 201 |
+| Final | 2026-04-20 (06:00 PM - 09:00 PM) | LSK Building Room 201 |
 
 ---
 
-## 👥 Contacts
+### Contacts
 
 | Name | Position | Email |
 | --- | --- | --- |
@@ -42,7 +42,7 @@
 
 ---
 
-## 🔗 Resources
+### Resources
 
 | Name | Link |
 | --- | --- |

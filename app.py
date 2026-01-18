@@ -1,5 +1,5 @@
 # app.py - Main Flask application
-from flask import Flask, render_template_string, request, send_file
+from flask import Flask, render_template_string, request, send_file, jsonify
 import os
 import json
 from pdf_gemini_analysis import process_pdf_with_gemini
@@ -264,7 +264,6 @@ HTML_TEMPLATE = '''
             
             <div class="form-group">
                 <label>Notion API Key (Optional)</label>
-                <small>For automatic import to your Notion account</small>
                 <input type="text" name="notion_api_key" placeholder="ntn_...">
                 <small>Get your integration token from <a href="https://www.notion.so/my-integrations" target="_blank">notion.so/my-integrations</a></small>
             </div>
@@ -278,6 +277,11 @@ HTML_TEMPLATE = '''
             </div>
             <div class="spinner"></div>
         </div>
+        
+        <div id="successMessage" style="display: none;" class="success-message">
+            ✓ Syllabus processed successfully!<br>
+            <span id="successDetails"></span>
+        </div>
     </div>
     
     <script>
@@ -287,6 +291,8 @@ HTML_TEMPLATE = '''
         const form = document.getElementById('uploadForm');
         const submitBtn = document.getElementById('submitBtn');
         const processingIndicator = document.getElementById('processingIndicator');
+        const successMessage = document.getElementById('successMessage');
+        const successDetails = document.getElementById('successDetails');
         
         fileInput.addEventListener('change', function(e) {
             if (this.files && this.files[0]) {
@@ -299,88 +305,151 @@ HTML_TEMPLATE = '''
             }
         });
         
-        form.addEventListener('submit', function(e) {
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
             submitBtn.disabled = true;
             submitBtn.textContent = 'Processing...';
             processingIndicator.style.display = 'block';
+            successMessage.style.display = 'none';
+            
+            const formData = new FormData(form);
+            
+            try {
+                const response = await fetch('/process', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Hide processing indicator
+                    processingIndicator.style.display = 'none';
+                    
+                    // Show success message
+                    successMessage.style.display = 'block';
+                    
+                    if (result.notion_url) {
+                        successDetails.innerHTML = `
+                            Template: ${result.template}<br>
+                            <strong>Notion Page:</strong> <a href="${result.notion_url}" target="_blank">Open in Notion</a>
+                        `;
+                    } else if (result.download_url) {
+                        successDetails.innerHTML = `
+                            Template: ${result.template}<br>
+                            <strong>Downloading markdown file...</strong>
+                        `;
+                        
+                        // Trigger download
+                        const a = document.createElement('a');
+                        a.href = result.download_url;
+                        a.download = 'course-syllabus.md';
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        
+                        // Reset form after 2 seconds
+                        setTimeout(() => {
+                            resetForm();
+                        }, 2000);
+                    }
+                } else {
+                    throw new Error(result.error || 'Processing failed');
+                }
+            } catch (error) {
+                processingIndicator.style.display = 'none';
+                alert('Error: ' + error.message);
+                resetForm();
+            }
         });
+        
+        function resetForm() {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Upload & Process Syllabus';
+            form.reset();
+            fileText.textContent = 'Choose PDF file...';
+            fileName.textContent = '';
+            successMessage.style.display = 'none';
+        }
     </script>
 </body>
 </html>
 '''
 
-@app.route('/', methods=['GET', 'POST'])
-def upload():
-    if request.method == 'POST':
+@app.route('/', methods=['GET'])
+def index():
+    return render_template_string(HTML_TEMPLATE)
+
+@app.route('/process', methods=['POST'])
+def process():
+    """Handle the actual processing and return JSON response"""
+    try:
         # Get selected template
         selected_template = request.form.get('template', 'modern')
         notion_api_key = request.form.get('notion_api_key', '').strip()
         
         # Get uploaded file
         if 'pdf_file' not in request.files:
-            return render_template_string(HTML_TEMPLATE, error="No file uploaded")
+            return jsonify({'success': False, 'error': 'No file uploaded'})
         
         file = request.files['pdf_file']
         
         if file.filename == '':
-            return render_template_string(HTML_TEMPLATE, error="No file selected")
+            return jsonify({'success': False, 'error': 'No file selected'})
         
         if not file.filename.endswith('.pdf'):
-            return render_template_string(HTML_TEMPLATE, error="File must be a PDF")
+            return jsonify({'success': False, 'error': 'File must be a PDF'})
         
         # Read the file data
         pdf_data = file.read()
         
-        # Process with Gemini (calls the separate module)
+        # Process with Gemini
         extracted_data, error, output_file = process_pdf_with_gemini(pdf_data, selected_template)
         
         if error:
-            return render_template_string(
-                HTML_TEMPLATE,
-                error=f"Failed to process PDF: {error}"
-            )
+            return jsonify({'success': False, 'error': f'Failed to process PDF: {error}'})
         
         # Populate markdown template
-        try:
-            template_path = f'notion_templates/notion_template_{selected_template}.md'
-            markdown_output = 'output/filled-in-template.md'
-            os.makedirs('output', exist_ok=True)
-            
-            if os.path.exists(template_path):
-                markdown_content = populate_markdown_template(output_file, template_path, markdown_output)
-                
-                # Import to Notion if API key provided
-                notion_url = None
-                if notion_api_key:
-                    success, notion_url, notion_error = import_to_notion(markdown_content, notion_api_key)
-                    if not success:
-                        print(f"Notion import failed: {notion_error}")
-                
-                # If no Notion key, download the file
-                if not notion_api_key:
-                    return send_file(markdown_output, as_attachment=True, download_name='filled-in-template.md')
-                
-                # Otherwise show success page with Notion link
-                return render_template_string(
-                    HTML_TEMPLATE,
-                    success=True,
-                    template=selected_template,
-                    output_file=output_file,
-                    notion_url=notion_url,
-                    extracted_data=json.dumps(extracted_data, indent=2)
-                )
-        except Exception as e:
-            print(f"Error populating template: {e}")
+        template_path = f'notion_templates/notion_template_{selected_template}.md'
+        markdown_output = 'output/filled-in-template.md'
+        os.makedirs('output', exist_ok=True)
         
-        return render_template_string(
-            HTML_TEMPLATE,
-            success=True,
-            template=selected_template,
-            output_file=output_file,
-            extracted_data=json.dumps(extracted_data, indent=2)
-        )
-    
-    return render_template_string(HTML_TEMPLATE)
+        if not os.path.exists(template_path):
+            return jsonify({'success': False, 'error': 'Template not found'})
+        
+        markdown_content = populate_markdown_template(output_file, template_path, markdown_output)
+        
+        # Import to Notion if API key provided
+        if notion_api_key:
+            success, notion_url, notion_error = import_to_notion(markdown_content, notion_api_key)
+            if not success:
+                return jsonify({'success': False, 'error': f'Notion import failed: {notion_error}'})
+            
+            return jsonify({
+                'success': True,
+                'template': selected_template,
+                'notion_url': notion_url
+            })
+        else:
+            # Return download URL instead of sending file directly
+            return jsonify({
+                'success': True,
+                'template': selected_template,
+                'download_url': '/download'
+            })
+            
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
+
+@app.route('/download')
+def download():
+    """Serve the generated markdown file"""
+    markdown_output = 'output/filled-in-template.md'
+    if os.path.exists(markdown_output):
+        return send_file(markdown_output, as_attachment=True, download_name='course-syllabus.md')
+    else:
+        return "File not found", 404
 
 if __name__ == '__main__':
     app.run(debug=True)
