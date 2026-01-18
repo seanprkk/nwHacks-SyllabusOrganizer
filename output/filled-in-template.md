@@ -29,8 +29,8 @@
 
 | Name | Date | Location |
 | --- | --- | --- |
-| Midterm | 2026-02-15 | LSK Building Room 201 (6pm-7pm) |
-| Final Exam | 2026-04-20 | LSK Building Room 201 (6pm-9pm) |
+| Midterm (6pm-7pm) | 2026-02-15 | LSK Building Room 201 |
+| Final Exam (6pm-9pm) | 2026-04-20 | LSK Building Room 201 |
 
 ---
 

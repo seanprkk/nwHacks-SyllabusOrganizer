@@ -1,16 +1,14 @@
-# gemini_processor.py - Gemini API processing logic
+# gemini_processor.py - OpenRouter API processing logic
 import os
 import json
-import time
-import tempfile
-from google import genai
-from google.genai import types
+import base64
+import requests
 
 # Configuration
-# API_KEY = os.getenv("GEMINI_API_KEY", "AIzaSyDPC-PMCvP95WVNFOMmyFqomUeAg43Eg5Q")
-API_KEY=""
-print(API_KEY)
+# API_KEY = os.getenv("OPENROUTER_API_KEY", "<openrouter.ai-key>")
+API_KEY = "open router api key"
 OUTPUT_JSON_FILE = "data/syllabus-info.json"
+OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions"
 
 # Gemini Prompt
 PROMPT = """
@@ -55,15 +53,17 @@ Extract the course information and strictly output valid JSON in the following f
     }
 }
 
-If a specific field is not found, leave it as null or an empty string.
+If a specific field is not found, leave it as "N/A".
 Ensure dates are in ISO8601 format where possible.
 Don't include TAs as contacts.
 Include the embedded links in the pdf under resources whenever possible.
+
+Output ONLY the JSON, no additional text or markdown formatting.
 """
 
 def process_pdf_with_gemini(pdf_data, selected_template):
     """
-    Process PDF with Gemini API and return extracted data
+    Process PDF with Gemini via OpenRouter API and return extracted data
     
     Args:
         pdf_data: Binary PDF data
@@ -73,59 +73,96 @@ def process_pdf_with_gemini(pdf_data, selected_template):
         tuple: (extracted_data, error, output_file)
     """
     try:
-        client = genai.Client(api_key=API_KEY)
+        # Convert PDF to base64
+        print("Converting PDF to base64...")
+        pdf_base64 = base64.b64encode(pdf_data).decode('utf-8')
         
-        # Create a temporary file to save the PDF
-        with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as tmp_file:
-            tmp_file.write(pdf_data)
-            tmp_file_path = tmp_file.name
+        # Prepare the API request
+        headers = {
+            "Authorization": f"Bearer {API_KEY}",
+            "Content-Type": "application/json",
+            "HTTP-Referer": "http://localhost:5000",  # Optional: your site URL
+            "X-Title": "Syllabus Processor"  # Optional: your app name
+        }
         
-        try:
-            # Upload file to Gemini
-            print(f"Uploading PDF to Gemini...")
-            pdf_file = client.files.upload(file=tmp_file_path)
-            print(f"Upload complete. File URI: {pdf_file.uri}")
-            
-            # Wait for processing
-            while pdf_file.state.name == "PROCESSING":
-                print("Processing file...")
-                time.sleep(2)
-                pdf_file = client.files.get(name=pdf_file.name)
-            
-            if pdf_file.state.name == "FAILED":
-                raise ValueError("File processing failed.")
-            
-            # Generate content
-            print("Analyzing document and generating JSON...")
-            response = client.models.generate_content(
-                model="gemini-flash-latest",
-                contents=[PROMPT, pdf_file],
-                config=types.GenerateContentConfig(
-                    response_mime_type="application/json"
-                )
-            )
-            
-            # Parse JSON
-            json_content = response.text
-            parsed_data = json.loads(json_content)
-            
-            # Ensure output directory exists
-            output_dir = os.path.dirname(OUTPUT_JSON_FILE)
-            if output_dir and not os.path.exists(output_dir):
-                os.makedirs(output_dir)
-            
-            # Save to file
-            with open(OUTPUT_JSON_FILE, "w", encoding="utf-8") as f:
-                json.dump(parsed_data, f, indent=4)
-            
-            print(f"Success! Data saved to: {OUTPUT_JSON_FILE}")
-            return parsed_data, None, OUTPUT_JSON_FILE
-            
-        finally:
-            # Clean up temporary file
-            if os.path.exists(tmp_file_path):
-                os.unlink(tmp_file_path)
+        payload = {
+            "model": "google/gemini-2.0-flash-exp:free",  # Free Gemini model on OpenRouter
+            "messages": [
+                {
+                    "role": "user",
+                    "content": [
+                        {
+                            "type": "text",
+                            "text": PROMPT
+                        },
+                        {
+                            "type": "image_url",
+                            "image_url": {
+                                "url": f"data:application/pdf;base64,{pdf_base64}"
+                            }
+                        }
+                    ]
+                }
+            ],
+            "response_format": {
+                "type": "json_object"
+            }
+        }
+        
+        # Make the API request
+        print("Sending request to OpenRouter (Gemini)...")
+        response = requests.post(
+            OPENROUTER_API_URL,
+            headers=headers,
+            json=payload,
+            timeout=120
+        )
+        
+        response.raise_for_status()
+        result = response.json()
+        
+        # Extract the JSON content from the response
+        print("Parsing response...")
+        json_content = result['choices'][0]['message']['content']
+        
+        # Try to parse the JSON (handle potential markdown code blocks)
+        json_content = json_content.strip()
+        if json_content.startswith('```'):
+            # Remove markdown code blocks if present
+            lines = json_content.split('\n')
+            json_content = '\n'.join(lines[1:-1]) if len(lines) > 2 else json_content
+        
+        parsed_data = json.loads(json_content)
+        
+        # Ensure output directory exists
+        output_dir = os.path.dirname(OUTPUT_JSON_FILE)
+        if output_dir and not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+        
+        # Save to file
+        with open(OUTPUT_JSON_FILE, "w", encoding="utf-8") as f:
+            json.dump(parsed_data, f, indent=4)
+        
+        print(f"Success! Data saved to: {OUTPUT_JSON_FILE}")
+        return parsed_data, None, OUTPUT_JSON_FILE
+    
+    except requests.exceptions.RequestException as e:
+        error_msg = f"API request failed: {str(e)}"
+        if hasattr(e, 'response') and e.response is not None:
+            try:
+                error_detail = e.response.json()
+                error_msg += f" - {error_detail}"
+            except:
+                error_msg += f" - {e.response.text}"
+        print(f"Error: {error_msg}")
+        return None, error_msg, None
+    
+    except json.JSONDecodeError as e:
+        error_msg = f"Failed to parse JSON response: {str(e)}"
+        print(f"Error: {error_msg}")
+        return None, error_msg, None
     
     except Exception as e:
-        print(f"Error processing PDF: {e}")
-        return None, str(e), None
+        error_msg = f"Unexpected error processing PDF: {str(e)}"
+        print(f"Error: {error_msg}")
+        return None, error_msg, None

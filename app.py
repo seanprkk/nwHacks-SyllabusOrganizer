@@ -252,7 +252,7 @@ HTML_TEMPLATE = '''
         const form = document.getElementById('uploadForm');
         const submitBtn = document.getElementById('submitBtn');
         const processingIndicator = document.getElementById('processingIndicator');
-        
+
         fileInput.addEventListener('change', function(e) {
             if (this.files && this.files[0]) {
                 const file = this.files[0];
@@ -263,11 +263,56 @@ HTML_TEMPLATE = '''
                 fileName.textContent = '';
             }
         });
-        
-        form.addEventListener('submit', function(e) {
+
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
             submitBtn.disabled = true;
             submitBtn.textContent = 'Processing...';
             processingIndicator.style.display = 'block';
+            
+            const formData = new FormData(form);
+            
+            try {
+                const response = await fetch('/', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (response.ok) {
+                    const contentType = response.headers.get('content-type');
+                    
+                    // Check if it's a file download
+                    if (contentType && contentType.includes('text/markdown')) {
+                        // Download the file
+                        const blob = await response.blob();
+                        const url = window.URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = 'filled-in-template.md';
+                        document.body.appendChild(a);
+                        a.click();
+                        window.URL.revokeObjectURL(url);
+                        document.body.removeChild(a);
+                        
+                        // Reload page after download
+                        window.location.reload();
+                    } else {
+                        // Error response - show the HTML
+                        const html = await response.text();
+                        document.open();
+                        document.write(html);
+                        document.close();
+                    }
+                } else {
+                    throw new Error('Upload failed');
+                }
+            } catch (error) {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Upload & Process Syllabus';
+                processingIndicator.style.display = 'none';
+                alert('Error processing file: ' + error.message);
+            }
         });
     </script>
 </body>
