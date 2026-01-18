@@ -7,7 +7,7 @@ from google import genai
 from google.genai import types
 
 # Configuration
-API_KEY = os.getenv("GEMINI_API_KEY", "AIzaSyBwPesUHFG-pUYf8slEx6pJFL6aLmrWtQc")
+API_KEY = os.getenv("GEMINI_API_KEY", "AIzaSyAsMfXixL6awDAz_tBXo_D_PwkOQ5__o7o")
 OUTPUT_JSON_FILE = "data/cpsc330-syllabus-info.json"
 
 # Gemini Prompt
@@ -96,7 +96,7 @@ def process_pdf_with_gemini(pdf_data, selected_template):
             # Generate content
             print("Analyzing document and generating JSON...")
             response = client.models.generate_content(
-                model="gemini-2.0-flash-exp",
+                model="gemini-flash-latest",
                 contents=[PROMPT, pdf_file],
                 config=types.GenerateContentConfig(
                     response_mime_type="application/json"

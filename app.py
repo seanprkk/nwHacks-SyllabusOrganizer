@@ -2,7 +2,7 @@
 from flask import Flask, render_template_string, request
 import os
 import json
-from gemini_processor import process_pdf_with_gemini
+from pdf_gemini_analysis import process_pdf_with_gemini
 
 app = Flask(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
