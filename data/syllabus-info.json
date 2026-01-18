@@ -1,0 +1,101 @@
+{
+    "course-info": {
+        "code": "MATH 100 section 101",
+        "title": "Differential Calculus",
+        "location": null,
+        "resources": [
+            {
+                "name": "Piazza",
+                "link": "example.com/piazza"
+            },
+            {
+                "name": "Canvas",
+                "link": "example.com/canvas"
+            }
+        ],
+        "contacts": [
+            {
+                "name": "John Smith",
+                "position": "Instructor",
+                "email": "john.smith@ubc.ca"
+            }
+        ],
+        "homework": [
+            {
+                "name": "Problem Set 1",
+                "due-date": "2026-01-10T23:59:00",
+                "links": "example.com/problemset1"
+            },
+            {
+                "name": "Problem Set 2",
+                "due-date": "2026-01-20T23:59:00",
+                "links": "example.com/problemset2"
+            },
+            {
+                "name": "Problem Set 3",
+                "due-date": "2026-02-10T23:59:00",
+                "links": "example.com/problemset3"
+            },
+            {
+                "name": "Problem Set 4",
+                "due-date": "2026-02-20T23:59:00",
+                "links": "example.com/problemset4"
+            },
+            {
+                "name": "Problem Set 5",
+                "due-date": "2026-03-10T23:59:00",
+                "links": "example.com/problemset5"
+            }
+        ],
+        "meetings": [
+            {
+                "type": "lecture",
+                "lead": "John Smith",
+                "day": "monday",
+                "start_time": "10:00:00",
+                "end_time": "11:00:00",
+                "location": "LSK Building Room 201"
+            },
+            {
+                "type": "lecture",
+                "lead": "John Smith",
+                "day": "wednesday",
+                "start_time": "10:00:00",
+                "end_time": "11:00:00",
+                "location": "LSK Building Room 201"
+            },
+            {
+                "type": "lecture",
+                "lead": "John Smith",
+                "day": "friday",
+                "start_time": "10:00:00",
+                "end_time": "11:00:00",
+                "location": "LSK Building Room 201"
+            },
+            {
+                "type": "tutorial",
+                "lead": null,
+                "day": "thursday",
+                "start_time": "16:00:00",
+                "end_time": "17:00:00",
+                "location": "ICICS Building Room X150"
+            }
+        ],
+        "Important-dates": [
+            {
+                "name": "Midterm",
+                "date": "2026-02-15",
+                "start_time": "18:00:00",
+                "end_time": "19:00:00",
+                "location": "LSK Building Room 201"
+            },
+            {
+                "name": "Final",
+                "date": "2026-04-20",
+                "start_time": "18:00:00",
+                "end_time": "21:00:00",
+                "location": "LSK Building Room 201"
+            }
+        ]
+    }
+}
