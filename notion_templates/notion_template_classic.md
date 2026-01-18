@@ -20,9 +20,9 @@
 
 ### Important Dates
 
-| Name | Date | Time | Location |
-| --- | --- | --- | --- |
-| <placeholder-important-dates-name> | <placeholder-important-dates-date> | <placeholder-important-dates-time> | <placeholder-important-dates-location> |
+| Name | Date | Location |
+| --- | --- | --- |
+| <placeholder-important-dates-name> | <placeholder-important-dates-date> | <placeholder-important-dates-location> |
 
 ---
 

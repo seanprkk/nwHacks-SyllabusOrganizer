@@ -6,7 +6,8 @@ import time
 
 # --- Configuration ---
 # Set your API key here or in the environment
-API_KEY = os.getenv("GEMINI_API_KEY", "AIzaSyBr6YefUZQkwJmd0d4jj54DgaNoc-uoPMc") 
+API_KEY = "AIzaSy" # ignore this!. see pdf_gemini_analysis.py for the actual api key
+
 
 PDF_FILENAME = "docs/cpsc330-2025W1_README.pdf" 
 OUTPUT_JSON_FILE = "data/syllabus-info.json"

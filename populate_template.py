@@ -58,11 +58,12 @@ def populate_markdown_template(json_file_path, template_path, output_path):
     if meetings:
         meeting_rows = []
         for meeting in meetings:
-            meeting_type = meeting.get('type', 'N/A')
-            lead = meeting.get('lead', 'N/A')
-            day = meeting.get('day', 'N/A').capitalize()
+            meeting_type = meeting.get('type') or 'N/A'
+            lead = meeting.get('lead') or 'N/A'
+            day = meeting.get('day')
+            day = day.capitalize() if day else 'N/A'
             time_range = format_meeting_time(meeting.get('start_time'), meeting.get('end_time'))
-            location = meeting.get('location', 'N/A')
+            location = meeting.get('location') or 'N/A'
             
             meeting_rows.append(
                 f"| {meeting_type} | {lead} | {day} | {time_range} | {location} |"
@@ -77,9 +78,9 @@ def populate_markdown_template(json_file_path, template_path, output_path):
     if homework:
         assignment_rows = []
         for hw in homework:
-            name = hw.get('name', 'N/A')
+            name = hw.get('name') or 'N/A'
             due_date = format_datetime(hw.get('due-date', ''))
-            link = hw.get('links', 'N/A')
+            link = hw.get('links') or 'N/A'
             
             assignment_rows.append(
                 f"| {name} | {due_date} | {link} |"
@@ -94,17 +95,25 @@ def populate_markdown_template(json_file_path, template_path, output_path):
     if important_dates:
         date_rows = []
         for date_entry in important_dates:
-            name = date_entry.get('name', 'N/A')
-            day = date_entry.get('day', 'N/A').capitalize()
-            notes = date_entry.get('notes', 'N/A')
+            name = date_entry.get('name') or 'N/A'
+            # Try 'date' field first, then fall back to 'day'
+            date_val = date_entry.get('date') or date_entry.get('day')
+            # Format the date if it's in ISO format
+            if date_val and 'T' in str(date_val):
+                date_val = format_datetime(date_val)
+            elif date_val:
+                date_val = str(date_val)
+            else:
+                date_val = 'N/A'
+            # Try 'location' field first, then fall back to 'notes'
+            location = date_entry.get('location') or date_entry.get('notes') or 'N/A'
             
-            # Important dates might not have time/location, using notes instead
             date_rows.append(
-                f"| {name} | {day} | - | {notes} |"
+                f"| {name} | {date_val} | {location} |"
             )
         
         # Replace the placeholder row
-        date_table_row = "| <placeholder-important-dates-name> | <placeholder-important-dates-date> | <placeholder-important-dates-time> | <placeholder-important-dates-location> |"
+        date_table_row = "| <placeholder-important-dates-name> | <placeholder-important-dates-date> | <placeholder-important-dates-location> |"
         result = result.replace(date_table_row, '\n'.join(date_rows))
     
     # Populate Contacts
@@ -112,9 +121,9 @@ def populate_markdown_template(json_file_path, template_path, output_path):
     if contacts:
         contact_rows = []
         for contact in contacts:
-            name = contact.get('name', 'N/A')
-            position = contact.get('position', 'N/A')
-            email = contact.get('email', 'N/A')
+            name = contact.get('name') or 'N/A'
+            position = contact.get('position') or 'N/A'
+            email = contact.get('email') or 'N/A'
             
             contact_rows.append(
                 f"| {name} | {position} | {email} |"
@@ -129,8 +138,8 @@ def populate_markdown_template(json_file_path, template_path, output_path):
     if resources:
         resource_rows = []
         for resource in resources:
-            name = resource.get('name', 'N/A')
-            link = resource.get('link', 'N/A')
+            name = resource.get('name') or 'N/A'
+            link = resource.get('link') or 'N/A'
             
             resource_rows.append(
                 f"| {name} | {link} |"

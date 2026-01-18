@@ -2,7 +2,7 @@
     "course-info": {
         "code": "MATH 100",
         "title": "Differential Calculus section 101",
-        "location": null,
+        "location": "LSK Building Room 201",
         "resources": [
             {
                 "name": "Piazza",
@@ -74,7 +74,7 @@
             },
             {
                 "type": "tutorial",
-                "lead": "TA/Staff",
+                "lead": "John Smith",
                 "day": "thursday",
                 "start_time": "16:00:00",
                 "end_time": "17:00:00",
@@ -84,13 +84,13 @@
         "Important-dates": [
             {
                 "name": "Midterm",
-                "day": "sunday",
-                "notes": "Feb. 15, 2026, 6pm-7pm. Location: LSK Building Room 201"
+                "date": "2026-02-15",
+                "location": "LSK Building Room 201 (6pm-7pm)"
             },
             {
                 "name": "Final Exam",
-                "day": "monday",
-                "notes": "Apr. 20, 2026, 6pm-9pm. Location: LSK Building Room 201"
+                "date": "2026-04-20",
+                "location": "LSK Building Room 201 (6pm-9pm)"
             }
         ]
     }

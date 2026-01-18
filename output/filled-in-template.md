@@ -9,7 +9,7 @@
 | lecture | John Smith | Monday | 10:00 AM - 11:00 AM | LSK Building Room 201 |
 | lecture | John Smith | Wednesday | 10:00 AM - 11:00 AM | LSK Building Room 201 |
 | lecture | John Smith | Friday | 10:00 AM - 11:00 AM | LSK Building Room 201 |
-| tutorial | TA/Staff | Thursday | 04:00 PM - 05:00 PM | ICICS Building Room X150 |
+| tutorial | John Smith | Thursday | 04:00 PM - 05:00 PM | ICICS Building Room X150 |
 
 ---
 
@@ -27,10 +27,10 @@
 
 ### Important Dates
 
-| Name | Date | Time | Location |
-| --- | --- | --- | --- |
-| Midterm | Sunday | - | Feb. 15, 2026, 6pm-7pm. Location: LSK Building Room 201 |
-| Final Exam | Monday | - | Apr. 20, 2026, 6pm-9pm. Location: LSK Building Room 201 |
+| Name | Date | Location |
+| --- | --- | --- |
+| Midterm | 2026-02-15 | LSK Building Room 201 (6pm-7pm) |
+| Final Exam | 2026-04-20 | LSK Building Room 201 (6pm-9pm) |
 
 ---
 

@@ -8,7 +8,7 @@ from google.genai import types
 
 # Configuration
 # API_KEY = os.getenv("GEMINI_API_KEY", "AIzaSyDPC-PMCvP95WVNFOMmyFqomUeAg43Eg5Q")
-API_KEY="AIzaSyDPC-PMCvP95WVNFOMmyFqomUeAg43Eg5Q"
+API_KEY=""
 print(API_KEY)
 OUTPUT_JSON_FILE = "data/syllabus-info.json"
 
@@ -48,8 +48,8 @@ Extract the course information and strictly output valid JSON in the following f
         "Important-dates": [
             {
                 "name": "ex. Holiday/Midterm 1",
-                "day": "tuesday",
-                "notes": "ex. Information TBA"
+                "date": "ex. 2026-01-01",
+                "location": "ex. Information TBA"
             }
         ]
     }
