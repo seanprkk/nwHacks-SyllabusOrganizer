@@ -15,7 +15,7 @@ HTML_TEMPLATE = '''
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Syllabus Upload</title>
+    <title>Syllaboss</title>
     <style>
         * {
             margin: 0;
@@ -212,7 +212,9 @@ HTML_TEMPLATE = '''
 </head>
 <body>
     <div class="container">
+        <h1>Syllaboss</h1>
         <h1>Upload Course Syllabus</h1>
+        <h1>... and get a beautiful Notion summary!</h1>
         
         {% if success %}
         <div class="success-message">

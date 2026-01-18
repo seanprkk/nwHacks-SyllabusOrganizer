@@ -60,18 +60,19 @@ def import_to_notion(markdown_content, notion_api_key):
         
     except Exception as e:
         return False, None, str(e)
-
-
 def markdown_to_notion_blocks(markdown_content):
-    """Convert markdown to Notion blocks (simplified version)"""
+    """Convert markdown to Notion blocks with proper table support"""
     blocks = []
     lines = markdown_content.split('\n')
     
-    for line in lines:
-        line = line.strip()
+    i = 0
+    while i < len(lines):
+        line = lines[i].strip()
+        
         if not line:
+            i += 1
             continue
-            
+        
         # Headers
         if line.startswith('# '):
             blocks.append({
@@ -79,28 +80,130 @@ def markdown_to_notion_blocks(markdown_content):
                 "type": "heading_1",
                 "heading_1": {"rich_text": [{"text": {"content": line[2:]}}]}
             })
-        elif line.startswith('## '):
+            i += 1
+        elif line.startswith('## '):  # ← ADDED THIS
             blocks.append({
                 "object": "block",
                 "type": "heading_2",
                 "heading_2": {"rich_text": [{"text": {"content": line[3:]}}]}
             })
-        # Table rows (simplified - Notion tables are complex)
-        elif line.startswith('|') and not line.startswith('| ---'):
-            # Convert table rows to bullet points for simplicity
-            cells = [cell.strip() for cell in line.split('|')[1:-1]]
-            if cells:
-                blocks.append({
-                    "object": "block",
-                    "type": "bulleted_list_item",
-                    "bulleted_list_item": {"rich_text": [{"text": {"content": " | ".join(cells)}}]}
-                })
+            i += 1
+        elif line.startswith('### '):
+            blocks.append({
+                "object": "block",
+                "type": "heading_3",
+                "heading_3": {"rich_text": [{"text": {"content": line[4:]}}]}
+            })
+            i += 1
+        # Detect table start
+        elif line.startswith('|') and i + 1 < len(lines) and lines[i + 1].strip().startswith('| ---'):
+            # Parse the entire table
+            table_block = parse_markdown_table(lines, i)
+            if table_block:
+                blocks.append(table_block)
+                # Skip past the table
+                i += count_table_rows(lines, i)
+            else:
+                i += 1
+        # Dividers
+        elif line == '---':
+            blocks.append({
+                "object": "block",
+                "type": "divider",
+                "divider": {}
+            })
+            i += 1
         # Regular text
-        elif line and not line.startswith('| ---'):
+        else:
             blocks.append({
                 "object": "block",
                 "type": "paragraph",
                 "paragraph": {"rich_text": [{"text": {"content": line}}]}
             })
+            i += 1
     
     return blocks
+
+
+def parse_markdown_table(lines, start_idx):
+    """Parse a markdown table into a Notion table block"""
+    try:
+        # Get header row
+        header_line = lines[start_idx].strip()
+        if not header_line.startswith('|'):
+            return None
+        
+        headers = [cell.strip() for cell in header_line.split('|')[1:-1]]
+        num_cols = len(headers)
+        
+        # Skip separator line
+        if start_idx + 1 >= len(lines):
+            return None
+        
+        # Get data rows
+        data_rows = []
+        idx = start_idx + 2  # Skip header and separator
+        
+        while idx < len(lines):
+            line = lines[idx].strip()
+            if not line.startswith('|'):
+                break
+            
+            cells = [cell.strip() for cell in line.split('|')[1:-1]]
+            if len(cells) == num_cols:
+                data_rows.append(cells)
+            idx += 1
+        
+        # Build Notion table block
+        table_width = num_cols
+        table_children = []
+        
+        # Add header row FIRST (as a single table_row with all headers)
+        header_cells = []
+        for header in headers:
+            header_cells.append([{"text": {"content": header}}])
+        
+        table_children.append({
+            "object": "block",
+            "type": "table_row",
+            "table_row": {"cells": header_cells}
+        })
+        
+        # Add data rows
+        for row in data_rows:
+            cells = []
+            for cell in row:
+                cells.append([{"text": {"content": cell}}])
+            
+            table_children.append({
+                "object": "block",
+                "type": "table_row",
+                "table_row": {"cells": cells}
+            })
+        
+        return {
+            "object": "block",
+            "type": "table",
+            "table": {
+                "table_width": table_width,
+                "has_column_header": True,
+                "has_row_header": False,
+                "children": table_children
+            }
+        }
+        
+    except Exception as e:
+        print(f"Error parsing table: {e}")
+        return None
+
+
+def count_table_rows(lines, start_idx):
+    """Count how many lines the table spans"""
+    count = 2  # Header + separator
+    idx = start_idx + 2
+    
+    while idx < len(lines) and lines[idx].strip().startswith('|'):
+        count += 1
+        idx += 1
+    
+    return count
