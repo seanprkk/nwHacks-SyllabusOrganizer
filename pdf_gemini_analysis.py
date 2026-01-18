@@ -7,7 +7,9 @@ from google import genai
 from google.genai import types
 
 # Configuration
-API_KEY = os.getenv("GEMINI_API_KEY", "AIzaSyAsMfXixL6awDAz_tBXo_D_PwkOQ5__o7o")
+# API_KEY = os.getenv("GEMINI_API_KEY", "AIzaSyDPC-PMCvP95WVNFOMmyFqomUeAg43Eg5Q")
+API_KEY="AIzaSyDPC-PMCvP95WVNFOMmyFqomUeAg43Eg5Q"
+print(API_KEY)
 OUTPUT_JSON_FILE = "data/syllabus-info.json"
 
 # Gemini Prompt

@@ -6,7 +6,7 @@ import time
 
 # --- Configuration ---
 # Set your API key here or in the environment
-API_KEY = os.getenv("GEMINI_API_KEY", "AIzaSyBwPesUHFG-pUYf8slEx6pJFL6aLmrWtQc") 
+API_KEY = os.getenv("GEMINI_API_KEY", "AIzaSyBr6YefUZQkwJmd0d4jj54DgaNoc-uoPMc") 
 
 PDF_FILENAME = "docs/cpsc330-2025W1_README.pdf" 
 OUTPUT_JSON_FILE = "data/syllabus-info.json"

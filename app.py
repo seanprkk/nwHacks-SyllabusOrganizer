@@ -1,8 +1,9 @@
 # app.py - Main Flask application
-from flask import Flask, render_template_string, request
+from flask import Flask, render_template_string, request, send_file
 import os
 import json
 from pdf_gemini_analysis import process_pdf_with_gemini
+from populate_template import populate_markdown_template
 
 app = Flask(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
@@ -302,6 +303,18 @@ def upload():
                 HTML_TEMPLATE,
                 error=f"Failed to process PDF: {error}"
             )
+        
+        # Populate markdown template and auto-download
+        try:
+            template_path = f'notion_templates/notion_template_{selected_template}.md'
+            markdown_output = 'output/filled-in-template.md'
+            os.makedirs('output', exist_ok=True)
+            
+            if os.path.exists(template_path):
+                populate_markdown_template(output_file, template_path, markdown_output)
+                return send_file(markdown_output, as_attachment=True, download_name='filled-in-template.md')
+        except Exception as e:
+            print(f"Error populating template: {e}")
         
         return render_template_string(
             HTML_TEMPLATE,
