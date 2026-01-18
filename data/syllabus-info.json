@@ -1,8 +1,8 @@
 {
     "course-info": {
-        "code": "MATH 100 section 101",
-        "title": "Differential Calculus",
-        "location": null,
+        "code": "MATH 100",
+        "title": "Differential Calculus section 101",
+        "location": "LSK Building Room 201",
         "resources": [
             {
                 "name": "Piazza",
@@ -16,7 +16,7 @@
         "contacts": [
             {
                 "name": "John Smith",
-                "position": "Instructor",
+                "position": "instructor",
                 "email": "john.smith@ubc.ca"
             }
         ],
@@ -90,7 +90,7 @@
                 "location": "LSK Building Room 201"
             },
             {
-                "name": "Final",
+                "name": "Final Exam",
                 "date": "2026-04-20",
                 "start_time": "18:00:00",
                 "end_time": "21:00:00",
