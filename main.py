@@ -1,5 +1,6 @@
 from google import genai
 from google.genai import types
+from dotenv import load_dotenv
 import os
 import json
 import time
@@ -55,10 +56,12 @@ Extract the course information and strictly output valid JSON in the following f
     }
 }
 
-If a specific field is not found, leave it as null or an empty string.
+If a specific field is not found, leave it as null.
 Ensure dates are in ISO8601 format where possible.
 Don't include TAs as contacts.
-Include the embedded links in the pdf under resources whenever possible.
+Include the embedded links in the pdf under resources for all objects under Resources.
+Especially course sites such as Piazza, Gradescope, Canvas, etc.
+Links are important so add every important link possible
 """
 
 def main():
@@ -67,6 +70,9 @@ def main():
     if not os.path.exists(PDF_FILENAME):
         print(f"Error: The file '{PDF_FILENAME}' was not found.")
         return
+    
+    if not API_KEY:
+        raise ValueError("No API Key found! Please check your .env file.")
 
     # Ensure output directory exists
     output_dir = os.path.dirname(OUTPUT_JSON_FILE)
