@@ -49,6 +49,8 @@ Extract the course information and strictly output valid JSON in the following f
             {
                 "name": "ex. Holiday/Midterm 1",
                 "date": "ex. 2026-01-01",
+                "start_time": "ex. 15:30:00",
+                "end_time": "ex. 16:50:00",
                 "location": "ex. Information TBA"
             }
         ]

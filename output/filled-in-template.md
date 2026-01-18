@@ -1,4 +1,4 @@
-# Overview for MATH 100 Differential Calculus section 101
+# Overview for MATH 100 section 101 Differential Calculus
 
 ---
 
@@ -9,7 +9,7 @@
 | lecture | John Smith | Monday | 10:00 AM - 11:00 AM | LSK Building Room 201 |
 | lecture | John Smith | Wednesday | 10:00 AM - 11:00 AM | LSK Building Room 201 |
 | lecture | John Smith | Friday | 10:00 AM - 11:00 AM | LSK Building Room 201 |
-| tutorial | John Smith | Thursday | 04:00 PM - 05:00 PM | ICICS Building Room X150 |
+| tutorial | N/A | Thursday | 04:00 PM - 05:00 PM | ICICS Building Room X150 |
 
 ---
 
@@ -29,8 +29,8 @@
 
 | Name | Date | Location |
 | --- | --- | --- |
-| Midterm | 2026-02-15 | LSK Building Room 201 (6pm-7pm) |
-| Final Exam | 2026-04-20 | LSK Building Room 201 (6pm-9pm) |
+| Midterm | 2026-02-15 (06:00 PM - 07:00 PM) | LSK Building Room 201 |
+| Final | 2026-04-20 (06:00 PM - 09:00 PM) | LSK Building Room 201 |
 
 ---
 
@@ -38,7 +38,7 @@
 
 | Name | Position | Email |
 | --- | --- | --- |
-| John Smith | instructor | john.smith@ubc.ca |
+| John Smith | Instructor | john.smith@ubc.ca |
 
 ---
 

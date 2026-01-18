@@ -105,6 +105,13 @@ def populate_markdown_template(json_file_path, template_path, output_path):
                 date_val = str(date_val)
             else:
                 date_val = 'N/A'
+
+            # Add time range formatting
+            start_time = date_entry.get('start_time')
+            end_time = date_entry.get('end_time')
+            if start_time and end_time:
+                time_range = format_meeting_time(start_time, end_time)
+                date_val = f"{date_val} ({time_range})"
             # Try 'location' field first, then fall back to 'notes'
             location = date_entry.get('location') or date_entry.get('notes') or 'N/A'
             
