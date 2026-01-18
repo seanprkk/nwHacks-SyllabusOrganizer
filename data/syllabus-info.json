@@ -2,7 +2,7 @@
     "course-info": {
         "code": "MATH 100",
         "title": "Differential Calculus section 101",
-        "location": "LSK Building Room 201",
+        "location": null,
         "resources": [
             {
                 "name": "Piazza",
@@ -16,7 +16,7 @@
         "contacts": [
             {
                 "name": "John Smith",
-                "position": "instructor",
+                "position": "Instructor",
                 "email": "john.smith@ubc.ca"
             }
         ],

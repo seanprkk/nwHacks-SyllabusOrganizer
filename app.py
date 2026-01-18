@@ -221,14 +221,7 @@ HTML_TEMPLATE = '''
             {% if notion_url %}
             <strong>Notion Page:</strong> <a href="{{ notion_url }}" target="_blank">Open in Notion</a><br>
             {% endif %}
-            Data saved to: {{ output_file }}
         </div>
-        {% if extracted_data %}
-        <div style="margin-top: 20px;">
-            <label>Extracted Data:</label>
-            <pre>{{ extracted_data }}</pre>
-        </div>
-        {% endif %}
         {% endif %}
         
         {% if error %}
@@ -269,7 +262,7 @@ HTML_TEMPLATE = '''
             
             <div class="form-group">
                 <label>Notion API Key (Optional - for auto-import)</label>
-                <input type="text" name="notion_api_key" placeholder="secret_...">
+                <input type="text" name="notion_api_key" placeholder="ntn_...">
                 <small>Get your integration token from <a href="https://www.notion.so/my-integrations" target="_blank">notion.so/my-integrations</a></small>
             </div>
             

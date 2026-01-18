@@ -38,7 +38,7 @@
 
 | Name | Position | Email |
 | --- | --- | --- |
-| John Smith | instructor | john.smith@ubc.ca |
+| John Smith | Instructor | john.smith@ubc.ca |
 
 ---
 
