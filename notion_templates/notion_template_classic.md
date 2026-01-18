@@ -1,50 +1,41 @@
-# 🏫 Course Information
-
-**Course Name:**  
-**Instructor:**  
-**Office Hours:**  
-**Office Location:**  
+# Overview for <placeholder-course-code> <placeholder-course-name>
 
 ---
 
-## ⏰ Class Times
+### Class Times
+
 | Type | Lead | Dates | Time | Location |
-|-----|------|-------|------|----------|
-| Lecture |  |  |  |  |
-| Seminar |  |  |  |  |
+| --- | --- | --- | --- | --- |
+| <placeholder-class-time-type> | <placeholder-class-time-lead> | <placeholder-class-time-date> | <placeholder-class-time-time> | <placeholder-class-time-location> |
 
 ---
 
-## ✍️ Assignments & Exams
+### Assignments
+
 | Name | Due Date | Link |
-|-----|----------|------|
-| Homework |  |  |
-| Midterm Exam |  |  |
-| Final Exam |  |  |
+| --- | --- | --- |
+| <placeholder-assignment-name> | <placeholder-assignment-due-date> | <placeholder-assignment-due-link> |
 
 ---
 
-## 📌 Important Dates
+### Important Dates
+
 | Name | Date | Time | Location |
-|-----|------|------|----------|
-| First Day of Class |  |  |  |
-| Midterm |  |  |  |
-| Final Exam |  |  |  |
+| --- | --- | --- | --- |
+| <placeholder-important-dates-name> | <placeholder-important-dates-date> | <placeholder-important-dates-time> | <placeholder-important-dates-location> |
 
 ---
 
-## 📇 Contacts
+### Contacts
+
 | Name | Position | Email |
-|-----|----------|-------|
-| Professor |  |  |
-| TA |  |  |
-| Department |  |  |
+| --- | --- | --- |
+| <placeholder-contacts-name> | <placeholder-contacts-position> | <placeholder-contacts-email> |
 
 ---
 
-## 📖 Resources
+### Resources
+
 | Name | Link |
-|-----|------|
-| Syllabus PDF |  |
-| Course Forum |  |
-| Reading List |  |
+| --- | --- |
+| <placeholder-link-name> | <placeholder-link-link> |
