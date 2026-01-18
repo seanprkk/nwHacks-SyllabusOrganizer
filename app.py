@@ -1,12 +1,11 @@
-from flask import Flask, render_template_string, request, redirect, url_for
+# app.py - Main Flask application
+from flask import Flask, render_template_string, request
 import os
+import json
+from gemini_processor import process_pdf_with_gemini
 
 app = Flask(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
-
-# Store uploaded file data in memory (in production, use a database)
-uploaded_pdf = None
-selected_template = None
 
 HTML_TEMPLATE = '''
 <!DOCTYPE html>
@@ -140,6 +139,44 @@ HTML_TEMPLATE = '''
             margin-bottom: 20px;
             border: 1px solid #c3e6cb;
         }
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #f5c6cb;
+        }
+        .processing-message {
+            background: #fff3cd;
+            color: #856404;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #ffeaa7;
+        }
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        pre {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
     </style>
 </head>
 <body>
@@ -148,9 +185,21 @@ HTML_TEMPLATE = '''
         
         {% if success %}
         <div class="success-message">
-            ✓ Syllabus uploaded successfully!<br>
+            ✓ Syllabus processed successfully!<br>
             Template: {{ template }}<br>
-            File size: {{ file_size }} bytes
+            Data saved to: {{ output_file }}
+        </div>
+        {% if extracted_data %}
+        <div style="margin-top: 20px;">
+            <label>Extracted Data:</label>
+            <pre>{{ extracted_data }}</pre>
+        </div>
+        {% endif %}
+        {% endif %}
+        
+        {% if error %}
+        <div class="error-message">
+            ✗ Error: {{ error }}
         </div>
         {% endif %}
         
@@ -184,14 +233,24 @@ HTML_TEMPLATE = '''
                 <div id="fileName" class="file-name"></div>
             </div>
             
-            <button type="submit">Upload Syllabus</button>
+            <button type="submit" id="submitBtn">Upload & Process Syllabus</button>
         </form>
+        
+        <div id="processingIndicator" style="display: none;">
+            <div class="processing-message">
+                Processing your syllabus with Gemini AI...
+            </div>
+            <div class="spinner"></div>
+        </div>
     </div>
     
     <script>
         const fileInput = document.getElementById('pdfFile');
         const fileText = document.getElementById('fileText');
         const fileName = document.getElementById('fileName');
+        const form = document.getElementById('uploadForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const processingIndicator = document.getElementById('processingIndicator');
         
         fileInput.addEventListener('change', function(e) {
             if (this.files && this.files[0]) {
@@ -203,6 +262,12 @@ HTML_TEMPLATE = '''
                 fileName.textContent = '';
             }
         });
+        
+        form.addEventListener('submit', function(e) {
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Processing...';
+            processingIndicator.style.display = 'block';
+        });
     </script>
 </body>
 </html>
@@ -210,33 +275,43 @@ HTML_TEMPLATE = '''
 
 @app.route('/', methods=['GET', 'POST'])
 def upload():
-    global uploaded_pdf, selected_template
-    
     if request.method == 'POST':
         # Get selected template
         selected_template = request.form.get('template', 'modern')
         
         # Get uploaded file
         if 'pdf_file' not in request.files:
-            return redirect(request.url)
+            return render_template_string(HTML_TEMPLATE, error="No file uploaded")
         
         file = request.files['pdf_file']
         
         if file.filename == '':
-            return redirect(request.url)
+            return render_template_string(HTML_TEMPLATE, error="No file selected")
         
-        if file and file.filename.endswith('.pdf'):
-            # Store the file data in memory
-            uploaded_pdf = file.read()
-            
+        if not file.filename.endswith('.pdf'):
+            return render_template_string(HTML_TEMPLATE, error="File must be a PDF")
+        
+        # Read the file data
+        pdf_data = file.read()
+        
+        # Process with Gemini (calls the separate module)
+        extracted_data, error, output_file = process_pdf_with_gemini(pdf_data, selected_template)
+        
+        if error:
             return render_template_string(
-                HTML_TEMPLATE, 
-                success=True, 
-                template=selected_template,
-                file_size=len(uploaded_pdf)
+                HTML_TEMPLATE,
+                error=f"Failed to process PDF: {error}"
             )
+        
+        return render_template_string(
+            HTML_TEMPLATE,
+            success=True,
+            template=selected_template,
+            output_file=output_file,
+            extracted_data=json.dumps(extracted_data, indent=2)
+        )
     
-    return render_template_string(HTML_TEMPLATE, success=False)
+    return render_template_string(HTML_TEMPLATE)
 
 if __name__ == '__main__':
     app.run(debug=True)

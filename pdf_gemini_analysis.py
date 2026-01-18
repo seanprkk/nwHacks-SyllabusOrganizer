@@ -1,28 +1,129 @@
+# gemini_processor.py - Gemini API processing logic
 import os
-import google.generativeai as genai
+import json
+import time
+import tempfile
+from google import genai
+from google.genai import types
 
+# Configuration
+API_KEY = os.getenv("GEMINI_API_KEY", "AIzaSyBwPesUHFG-pUYf8slEx6pJFL6aLmrWtQc")
+OUTPUT_JSON_FILE = "data/cpsc330-syllabus-info.json"
 
-def analyze_pdf(file_path, prompt):
-    # 2. Upload the file to the File API
-    print(f"Uploading file: {file_path}...")
-    sample_pdf = genai.upload_file(file_path, mime_type="application/pdf")
+# Gemini Prompt
+PROMPT = """
+You are a data extraction assistant. Analyze the attached course syllabus PDF.
+Extract the course information and strictly output valid JSON in the following format:
+
+{
+    "course-info": {
+        "code": "ex. Cpsc 330",
+        "title": "ex. Applied Machine Learning",
+        "location": "ex. DMP 310",
+        "resources": [
+            { "name": "ex. Piazza", "link": "ex. piazza.com" }
+        ],
+        "contacts": [
+            { "name": "ex. Prof. Steph", "position": "ex. instructor", "email": "ex. gtoti@cs.ubc.ca" }
+        ],
+        "homework": [
+            { 
+                "name": "ex. Hw1",
+                "due-date": "ex. 2025-09-09T23:59:00", 
+                "links": "ex. Gradescope link" 
+            }
+        ],
+        "meetings": [
+            {
+                "type": "ex. lecture/lab/tutorial",
+                "lead": "ex. Prof. Steph",
+                "day": "tuesday",
+                "start_time": "ex. 15:30:00",
+                "end_time": "ex. 16:50:00",
+                "location": "DMP 310"
+            }
+        ],
+        "Important-dates": [
+            {
+                "name": "ex. Holiday/Midterm 1",
+                "day": "tuesday",
+                "notes": "ex. Information TBA"
+            }
+        ]
+    }
+}
+
+If a specific field is not found, leave it as null or an empty string.
+Ensure dates are in ISO8601 format where possible.
+Don't include TAs as contacts.
+Include the embedded links in the pdf under resources whenever possible.
+"""
+
+def process_pdf_with_gemini(pdf_data, selected_template):
+    """
+    Process PDF with Gemini API and return extracted data
     
-    print(f"File uploaded. URI: {sample_pdf.uri}")
-
-    # 3. Select the model (Gemini 1.5 Flash is efficient for documents)
-    model = genai.GenerativeModel("gemini-1.5-flash")
-
-    # 4. Generate content using the prompt and the uploaded file
-    print("Generating content...")
-    response = model.generate_content([prompt, sample_pdf])
-
-    # 5. Print the response
-    print("\nResponse:")
-    print(response.text)
-
-    # Optional: Delete the file from the cloud after use to manage storage
-    # sample_pdf.delete()
-
-# Example Usage:
-# Ensure you have a file named 'sample_document.pdf' in the same folder
-# analyze_pdf("sample_document.pdf", "Summarize this document in 3 bullet points.")
+    Args:
+        pdf_data: Binary PDF data
+        selected_template: Template name (for future use)
+    
+    Returns:
+        tuple: (extracted_data, error, output_file)
+    """
+    try:
+        client = genai.Client(api_key=API_KEY)
+        
+        # Create a temporary file to save the PDF
+        with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as tmp_file:
+            tmp_file.write(pdf_data)
+            tmp_file_path = tmp_file.name
+        
+        try:
+            # Upload file to Gemini
+            print(f"Uploading PDF to Gemini...")
+            pdf_file = client.files.upload(file=tmp_file_path)
+            print(f"Upload complete. File URI: {pdf_file.uri}")
+            
+            # Wait for processing
+            while pdf_file.state.name == "PROCESSING":
+                print("Processing file...")
+                time.sleep(2)
+                pdf_file = client.files.get(name=pdf_file.name)
+            
+            if pdf_file.state.name == "FAILED":
+                raise ValueError("File processing failed.")
+            
+            # Generate content
+            print("Analyzing document and generating JSON...")
+            response = client.models.generate_content(
+                model="gemini-2.0-flash-exp",
+                contents=[PROMPT, pdf_file],
+                config=types.GenerateContentConfig(
+                    response_mime_type="application/json"
+                )
+            )
+            
+            # Parse JSON
+            json_content = response.text
+            parsed_data = json.loads(json_content)
+            
+            # Ensure output directory exists
+            output_dir = os.path.dirname(OUTPUT_JSON_FILE)
+            if output_dir and not os.path.exists(output_dir):
+                os.makedirs(output_dir)
+            
+            # Save to file
+            with open(OUTPUT_JSON_FILE, "w", encoding="utf-8") as f:
+                json.dump(parsed_data, f, indent=4)
+            
+            print(f"Success! Data saved to: {OUTPUT_JSON_FILE}")
+            return parsed_data, None, OUTPUT_JSON_FILE
+            
+        finally:
+            # Clean up temporary file
+            if os.path.exists(tmp_file_path):
+                os.unlink(tmp_file_path)
+    
+    except Exception as e:
+        print(f"Error processing PDF: {e}")
+        return None, str(e), None
